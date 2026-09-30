@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 public class Arvore {
     private No raiz;
 
@@ -5,30 +7,55 @@ public class Arvore {
         this.raiz = raiz;
     }
 
-    public void inserirPalavra(String palavra) {
+    public void inserirPalavra(String palavra, int linha, int coluna) {
         String bitsPalavra = converterPalavraBit(palavra);
 
-        if (bitsPalavra.charAt(0) == '0') inserirPalavra(palavra, raiz.getNoEsq());
-        else inserirPalavra(palavra, raiz.getNoDir());
+        if (bitsPalavra.charAt(0) == '0') {
+            if (raiz.getNoEsq() == null) {
+                No novoNo = new No(bitsPalavra, null, null);
+                novoNo.adicionarOcorrencia(linha, coluna);
+                raiz.setNoEsq(novoNo);
+                System.out.println("Palavra inserida com sucesso!");
+            } else {
+                inserirPalavra(bitsPalavra, linha, coluna, raiz.getNoEsq());
+            }
+        } else {
+            if (raiz.getNoDir() == null) {
+                No novoNo = new No(bitsPalavra, null, null);
+                novoNo.adicionarOcorrencia(linha, coluna);
+                raiz.setNoDir(novoNo);
+                System.out.println("Palavra inserida com sucesso!");
+            } else {
+                inserirPalavra(bitsPalavra, linha, coluna, raiz.getNoDir());
+            }
+        }
     }
 
-    private void inserirPalavra(String palavra, No raiz) {
+    private void inserirPalavra(String bits, int linha, int coluna, No raiz) {
         int i = 0;
 
-        while (i < raiz.getValor().length() && palavra.charAt(0) == raiz.getValor().charAt(i)) {
-            palavra = palavra.substring(1);
+        String valorNoStr = raiz.getValor();
+
+        while (i < valorNoStr.length() && bits.length() > 0 && bits.charAt(0) == valorNoStr.charAt(i)) {
+            bits = bits.substring(1);
             i++;
         }
 
-        if (i<raiz.getValor().length()) {
-            String newValor = raiz.getValor().substring(0, i);
-            String valorNoNovo = raiz.getValor().substring(i);
+        if (i<valorNoStr.length()) {
+            String newValor = valorNoStr.substring(0, i);
+            String valorNoNovo = valorNoStr.substring(i);
             No noDir = raiz.getNoDir();
             No noEsq = raiz.getNoEsq();
 
-            raiz.setValor(newValor);
             No novoNo = new No(valorNoNovo, noEsq, noDir);
-            No noInserido = new No(palavra, null, null);
+            novoNo.setOcorrencias(new ArrayList<>(raiz.getOcorrencias()));
+
+            raiz.setValor(newValor);
+            raiz.getOcorrencias().clear();
+
+            No noInserido = new No(bits, null, null);
+            noInserido.adicionarOcorrencia(linha, coluna);
+
             if (valorNoNovo.charAt(0) == '0') {
                 raiz.setNoEsq(novoNo);
                 raiz.setNoDir(noInserido);
@@ -41,59 +68,89 @@ public class Arvore {
             return;
         }
 
-        if (palavra.length() == 0) {
-            raiz.setOcorrencias(raiz.getOcorrencias() + 1);
-            System.out.println("Essa palavra ja existe na árvore! Repeticao adicionada!");
+        if (bits.length() == 0) {
+            raiz.adicionarOcorrencia(linha, coluna);
+            System.out.println("Palavra já existe! Nova ocorrência adicionada à lista.");
             return;
         }
 
-        if (palavra.charAt(0) == '0') {
+        if (bits.charAt(0) == '0') {
             if (raiz.getNoEsq() == null) {
-                raiz.setNoEsq(new No(palavra, null, null));
+                No novoFilho = new No(bits, null, null);
+                novoFilho.adicionarOcorrencia(linha, coluna);
+                raiz.setNoEsq(novoFilho);
                 System.out.printf("Palavra inserida com sucesso!\n");
             } else {
-                inserirPalavra(palavra, raiz.getNoEsq());
+                inserirPalavra(bits, linha, coluna, raiz.getNoEsq());
             }
         } else {
             if (raiz.getNoDir() == null) {
-                raiz.setNoDir(new No(palavra, null, null));
+                No novoFilho = new No(bits, null, null);
+                novoFilho.adicionarOcorrencia(linha, coluna);
+                raiz.setNoDir(novoFilho);
                 System.out.printf("Palavra inserida com sucesso!\n");
             } else {
-                inserirPalavra(palavra, raiz.getNoDir());
+                inserirPalavra(bits, linha, coluna, raiz.getNoDir());
             }
         }
     }
 
     public void buscarPalavra(String palavra) {
         String bitsPalavra = converterPalavraBit(palavra);
-        if (bitsPalavra.charAt(0) == '0') buscarPalavra(bitsPalavra, raiz.getNoEsq());
-        else buscarPalavra(bitsPalavra, raiz.getNoDir());
+
+        if (bitsPalavra.charAt(0) == '0') {
+            if (raiz.getNoEsq() != null) {
+                buscarPalavra(bitsPalavra, raiz.getNoEsq());
+            } else {
+                System.out.println("Palavra não encontrada!");
+            }
+        } else {
+            if (raiz.getNoDir() != null) {
+                buscarPalavra(bitsPalavra, raiz.getNoDir());
+            } else {
+                System.out.println("Palavra não encontrada!");
+            }
+        }
     }
 
-    private void buscarPalavra(String palavra, No raiz) {
-        if(palavra.equals(raiz.getValor())) System.out.printf("Palavra encontrada! Número de repetições: " + raiz.getOcorrencias());
+    private void buscarPalavra(String bits, No raiz) {
+        String valorNoStr = raiz.getValor();
+
+        if(bits.equals(valorNoStr)) imprimirOcorrencias(raiz);
         else {
             int i = 0;
-            while (i<raiz.getValor().length() && palavra.charAt(0) == raiz.getValor().charAt(i)) {
-                palavra = palavra.substring(1);
+            while (i<valorNoStr.length() && bits.length() > 0 && bits.charAt(0) == valorNoStr.charAt(i)) {
+                bits = bits.substring(1);
                 i++;
             }
 
-            if (i<raiz.getValor().length()) {
+            if (i<valorNoStr.length()) {
                 System.out.printf("Palavra não encontrada!");
                 return;
             }
 
-            if (palavra.length() == 0) {
-                System.out.printf("Palavra encontrada! Número de repetições: " + raiz.getOcorrencias());
+            if (bits.length() == 0) {
+                imprimirOcorrencias(raiz);
                 return;
             }
 
-            if (palavra.charAt(0) == '0' && raiz.getNoEsq() != null) buscarPalavra(palavra, raiz.getNoEsq());
-            else if (palavra.charAt(0) == '1' && raiz.getNoDir() != null) buscarPalavra(palavra, raiz.getNoDir());
+            if (bits.charAt(0) == '0' && raiz.getNoEsq() != null) buscarPalavra(bits, raiz.getNoEsq());
+            else if (bits.charAt(0) == '1' && raiz.getNoDir() != null) buscarPalavra(bits, raiz.getNoDir());
             else {
                 System.out.printf("Palavra não encontrada!");
             }
+        }
+    }
+
+    private void imprimirOcorrencias(No noAtual) {
+        if (noAtual.getOcorrencias().isEmpty()) {
+            System.out.println("Palavra não encontrada (Caminho existe, mas é apenas um nó interno de roteamento).");
+            return;
+        }
+
+        System.out.println("Palavra encontrada nas seguintes posições:");
+        for (Ocorrencia o : noAtual.getOcorrencias()) {
+            System.out.printf("- Linha: %d, Coluna: %d\n", o.getLinha(), o.getColuna());
         }
     }
 

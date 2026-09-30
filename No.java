@@ -1,21 +1,27 @@
+import java.util.ArrayList;
+
 public class No {
     private String valor;
-    private int ocorrencias;
+    private ArrayList<Ocorrencia> ocorrencias;
     private No noEsq;
     private No noDir;
 
     public No() {
         this.valor = "";
-        this.ocorrencias = 0;
+        this.ocorrencias = new ArrayList<>();
         this.noEsq = null;
         this.noDir = null;
     }
 
     public No(String valor, No noEsq, No noDir) {
         this.valor = valor;
-        this.ocorrencias = 0;
+        this.ocorrencias = new ArrayList<>();
         this.noEsq = noEsq;
         this.noDir = noDir;
+    }
+
+    public void adicionarOcorrencia(int linha, int coluna) {
+        this.ocorrencias.add(new Ocorrencia(linha, coluna));
     }
 
     public String getValor() {
@@ -26,11 +32,11 @@ public class No {
         this.valor = valor;
     }
 
-    public int getOcorrencias() {
+    public ArrayList<Ocorrencia> getOcorrencias() {
         return ocorrencias;
     }
 
-    public void setOcorrencias(int ocorrencias) {
+    public void setOcorrencias(ArrayList<Ocorrencia> ocorrencias) {
         this.ocorrencias = ocorrencias;
     }
 
